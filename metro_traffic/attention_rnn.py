@@ -7,7 +7,7 @@ class AttentionRNN(nn.Module):
     """Class containing the architecture of the model and the corresponding weights
     Contains a classical implementation of attention model"""
 
-    def __init__(self, input_size, num_alphabet, Ty, project_size=25, encoder_hidden_size=128,
+    def __init__(self, input_size, num_alphabet, Ty, project_size=192, encoder_hidden_size=128,
                  encoder_num_layers=2, decoder_hidden_size=128, decoder_num_layers=1, dropout=0.1,
                  save_attention=False):
         super().__init__()
@@ -29,8 +29,8 @@ class AttentionRNN(nn.Module):
         self.post_attention_lstm = nn.LSTM(self.encoder.hidden_size * 2, hidden_size=decoder_hidden_size,
                                            num_layers=decoder_num_layers, batch_first=True, dropout=dropout)
         self.attention = nn.Sequential(
-            nn.Linear(self.encoder.hidden_size * 2 + self.post_attention_lstm.hidden_size, 40),
-            nn.ReLU(), nn.Linear(40, 1))
+            nn.Linear(self.encoder.hidden_size * 2 + self.post_attention_lstm.hidden_size, 80),
+            nn.ReLU(), nn.Linear(80, 1))
         self.fc = nn.Linear(self.post_attention_lstm.hidden_size, self.num_alphabet)
         self.infos = {"attention": []}
         self.save_attention = save_attention
@@ -51,8 +51,8 @@ class AttentionRNN(nn.Module):
             self.infos["attention"] = []
 
         result = []
-        x = self.fc1(x)
-        x2 = self.fc2(x2)
+        x = F.relu(self.fc1(x))
+        x2 = F.relu(self.fc2(x2))
         x2, _ = self.encoder2(x2)
         x, _ = self.encoder(x)
         x = torch.cat([x, x2], dim=-2)

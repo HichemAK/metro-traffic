@@ -113,7 +113,9 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, ba
 def evaluate(model, data_test, target_test, criterion, batch_size, cuda=False):
     stride = 48
     step = 5
-    total_loss = 0
+    total_loss = torch.zeros(stride)
+    if cuda:
+        total_loss = total_loss.cuda()
     count = 0
     inputs = [0, ] * len(data_test)
     model.eval()
@@ -139,5 +141,8 @@ def evaluate(model, data_test, target_test, criterion, batch_size, cuda=False):
             with torch.no_grad():
                 out = model(*inputs)
                 loss = criterion(out, y)
+            loss = loss.squeeze()
+            loss = torch.mean(loss, dim=0)
+
             total_loss += loss
     return total_loss / count
