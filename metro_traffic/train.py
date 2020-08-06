@@ -109,3 +109,33 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, ba
 
     print('Best Validation Loss :', best_loss)
     return best_model
+
+def evaluate(model, data_test, target_test, criterion, batch_size, cuda=False):
+    stride = 48
+    step = 5
+    total_loss = 0
+    count = 0
+    for t in range(0, stride, step):
+        data = [0] * len(data_test)
+        for i in range(len(data)):
+            data[i] = data_test[i][i:i + stride * ((data_test[i].shape[0] - i) // stride)]
+            data[i] = data[i].reshape(data[i].shape[0] // stride, stride, data[i].shape[-1])
+        target = target_test[i:i + stride * ((target_test.shape[0] - i) // stride)]
+        target = target.reshape(target.shape[0] // stride, stride, target.shape[-1])
+        for i in range(0, data[0].shape[0], batch_size):
+            for j in range(len(data)):
+                inputs[j] = data[j][i:i + batch_size]
+                inputs[j] = torch.from_numpy(inputs[j]).float()
+
+            y = target[i:i + batch_size]
+            y = torch.from_numpy(y).float()
+
+            if cuda:
+                y = y.cuda()
+                inputs = [x.cuda() for x in inputs]
+            count += 1
+            with torch.no_grad():
+                out = model(*inputs)
+                loss = criterion(out, y)
+            total_loss += loss
+    return total_loss / count

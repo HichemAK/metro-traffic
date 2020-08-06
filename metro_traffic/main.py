@@ -6,7 +6,7 @@ from torch import nn
 import numpy as np
 
 from metro_traffic.attention_rnn import AttentionRNN
-from metro_traffic.train import torch_train_loop
+from metro_traffic.train import torch_train_loop, evaluate
 from metro_traffic.utils import CustomStandardScaler
 
 train = pd.read_csv('train.csv')
@@ -29,8 +29,10 @@ model = AttentionRNN(x1s_train.shape[-1], 1, Ty=48)
 data_train = [x1s_train, x2s_train]
 data_test = [x1s_test, x2s_test]
 
-model = torch_train_loop(model, data_train, data_test, target_train, target_test, batch_size=4, num_epochs=60,
+model = torch_train_loop(model, data_train, data_test, target_train, target_test, batch_size=32, num_epochs=60,
                          criterion=nn.MSELoss(),
-                         print_every=20, lr=0.001)
+                         print_every=20, lr=0.05)
 
 torch.save(model, 'model.pt')
+
+evaluate()
