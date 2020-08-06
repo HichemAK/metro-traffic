@@ -28,6 +28,7 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, ba
         total_loss = 0
         model.train()
         inputs = [0, ] * len(data_train)
+        count = 0
         for t in range(0, stride, step):
             data = [0] * len(data_train)
             for i in range(len(data)):
@@ -54,13 +55,15 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, ba
                 loss.backward()
                 optimizer.step()
                 total_loss += loss.item()
+                count += 1
 
                 if (i // batch_size + 1) % print_every == 0:
-                    print('Loss :', total_loss / (i // batch_size + 1))
-        print('Training Loss', total_loss / (i // batch_size + 1))
+                    print('Loss :', total_loss / count)
+        print('Training Loss', total_loss / count)
         total_loss = 0
         model.eval()
 
+        count = 0
         for t in range(0, stride, step):
             data = [0] * len(data_train)
             for i in range(len(data)):
@@ -84,8 +87,9 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, ba
                     out = model(*inputs)
                     loss = criterion(out, y)
                 total_loss += loss.item()
+                count += 1
 
-        total_loss = total_loss / (i // batch_size + 1)
+        total_loss = total_loss / count
         if best_loss > total_loss:
             best_loss = total_loss
             print('New best reached!')
