@@ -115,6 +115,8 @@ def evaluate(model, data_test, target_test, criterion, batch_size, cuda=False):
     step = 5
     total_loss = 0
     count = 0
+    inputs = [0, ] * len(data_test)
+    model.eval()
     for t in range(0, stride, step):
         data = [0] * len(data_test)
         for i in range(len(data)):
