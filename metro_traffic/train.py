@@ -14,6 +14,9 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, ba
                      seed=12362736):
     random.seed(seed, version=2)
     torch.manual_seed(seed)
+    if cuda:
+        model = model.cuda()
+
     optimizer = optimizer(model.parameters(), lr, weight_decay=weight_decay)
     best_loss = float('inf')
     not_improved = 0
