@@ -85,27 +85,27 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, ba
                     loss = criterion(out, y)
                 total_loss += loss.item()
 
-            total_loss = total_loss / (i // batch_size + 1)
-            if best_loss > total_loss:
-                best_loss = total_loss
-                print('New best reached!')
-                not_improved = 0
-                best_model = copy.deepcopy(model)
-            else:
-                not_improved += 1
+        total_loss = total_loss / (i // batch_size + 1)
+        if best_loss > total_loss:
+            best_loss = total_loss
+            print('New best reached!')
+            not_improved = 0
+            best_model = copy.deepcopy(model)
+        else:
+            not_improved += 1
 
-            if (not_improved + 1) % valid_check == 0:
-                print('Learning rate decreased... lr=', end='')
-                for param_group in optimizer.param_groups:
-                    param_group['lr'] = param_group['lr'] * anneal_coeff
-                    print(param_group['lr'], end=' ')
-                print()
+        if (not_improved + 1) % valid_check == 0:
+            print('Learning rate decreased... lr=', end='')
+            for param_group in optimizer.param_groups:
+                param_group['lr'] = param_group['lr'] * anneal_coeff
+                print(param_group['lr'], end=' ')
+            print()
 
-            if not_improved > max_not_improved:
-                break
+        if not_improved > max_not_improved:
+            break
 
-            print('Validation Loss', total_loss)
-            print('\n')
+        print('Validation Loss', total_loss)
+        print('\n')
 
     print('Best Validation Loss :', best_loss)
     return best_model
