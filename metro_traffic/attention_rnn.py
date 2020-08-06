@@ -7,7 +7,7 @@ class AttentionRNN(nn.Module):
     """Class containing the architecture of the model and the corresponding weights
     Contains a classical implementation of attention model"""
 
-    def __init__(self, input_size, num_alphabet, Ty, project_size=192, encoder_hidden_size=128,
+    def __init__(self, input_size, num_alphabet, Ty, project_size=256, encoder_hidden_size=128,
                  encoder_num_layers=2, decoder_hidden_size=128, decoder_num_layers=1, dropout=0.1,
                  save_attention=False):
         super().__init__()
