@@ -21,13 +21,17 @@ class AttentionRNN(nn.Module):
         self.dropout2 = nn.Dropout(dropout)
 
         self.fc1 = nn.Linear(input_size, project_size)
-        self.fc2 = nn.Linear(input_size-1, project_size)
+        self.fc2 = nn.Linear(input_size - 1, project_size)
         self.encoder = nn.LSTM(project_size, hidden_size=encoder_hidden_size, num_layers=encoder_num_layers,
                                bidirectional=True, batch_first=True, dropout=dropout)
         self.post_attention_lstm = nn.LSTM(self.encoder.hidden_size * 2, hidden_size=decoder_hidden_size,
                                            num_layers=decoder_num_layers, batch_first=True, dropout=dropout)
         self.attention = nn.Sequential(
-            nn.Linear(self.encoder.hidden_size * 2 + self.post_attention_lstm.hidden_size, 80),
+            nn.Linear(
+                self.encoder.hidden_size * 2 + self.post_attention_lstm.hidden_size *
+                self.post_attention_lstm.num_layers,
+                80
+            ),
             nn.ReLU(), nn.Linear(80, 1))
         self.fc = nn.Linear(self.post_attention_lstm.hidden_size, self.num_alphabet)
         self.infos = {"attention": []}
@@ -57,7 +61,9 @@ class AttentionRNN(nn.Module):
         self.Tx = x.shape[1]
         s_prev, c_prev = self.init_hidden(self.post_attention_lstm, x.shape[0])
         for _ in range(self.Ty):
-            context = self.calc_context(x, s_prev.squeeze(0))
+            s_prev_t = s_prev.transpose(0, 1)
+            s_prev_t = s_prev_t.reshape(s_prev_t.shape[0], -1)
+            context = self.calc_context(x, s_prev_t)
             context = context.unsqueeze(dim=1)
             y, (s_prev, c_prev) = self.post_attention_lstm(context, (s_prev, c_prev))
             y = self.dropout2(y)

@@ -26,15 +26,16 @@ x1s_train, x2s_train, target_train = ss.fit_transform([x1s_train, x2s_train, tar
 x1s_test, x2s_test, target_test = ss.transform([x1s_test, x2s_test, target_test])
 
 target_train, target_test = np.expand_dims(target_train, -1), np.expand_dims(target_test, -1)
-model = AttentionRNN(x1s_train.shape[-1], 1, Ty=4)
+model = AttentionRNN(x1s_train.shape[-1], 1, Ty=packet_size, project_size=100, encoder_hidden_size=32, encoder_num_layers=4,
+                     decoder_hidden_size=32, decoder_num_layers=4, dropout=0)
 
 print(ss.ss[-1].mean_, np.sqrt(ss.ss[-1].var_))
 
 data_train = [x1s_train, x2s_train]
 data_test = [x1s_test, x2s_test]
 
-model = torch_train_loop(model, data_train, data_test, target_train, target_test, batch_size=32, num_epochs=60,
+model = torch_train_loop(model, data_train, data_test, target_train, target_test, batch_size=32, num_epochs=1000,
                          criterion=nn.MSELoss(),
-                         print_every=20, lr=0.05, stride=4, step=1)
+                         print_every=20, lr=0.05, stride=packet_size, step=1)
 
 torch.save(model, 'model.pt')
