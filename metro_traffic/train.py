@@ -124,7 +124,7 @@ def evaluate(model, data_test, target_test, criterion, batch_size, cuda=False):
     for t in range(0, stride, step):
         data = [0] * len(data_test)
         for i in range(len(data)):
-            data[i] = data_test[i][i:i + stride * ((data_test[i].shape[0] - i) // stride)]
+            data[i] = data_test[i][t:t + stride * ((data_test[i].shape[0] - t) // stride)]
             data[i] = data[i].reshape(data[i].shape[0] // stride, stride, data[i].shape[-1])
         target = target_test[i:i + stride * ((target_test.shape[0] - i) // stride)]
         target = target.reshape(target.shape[0] // stride, stride, target.shape[-1])
