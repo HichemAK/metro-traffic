@@ -7,17 +7,14 @@ from torch import nn
 from metro_traffic.utils import shuffle_jointly
 
 
-def torch_train_loop(model, data_train, data_test, target_train, target_test, batch_size=32, num_epochs=60,
+def torch_train_loop(model, data_train, data_test, target_train, target_test, optimizer, batch_size=32, num_epochs=60,
                      criterion=nn.MSELoss(),
-                     optimizer=torch.optim.Adam, weight_decay=0, lr=0.001,
                      valid_check=3, anneal_coeff=0.6, max_not_improved=5, print_every=100000000, cuda=False,
                      stride=48, step=5, seed=12362736):
     random.seed(seed, version=2)
     torch.manual_seed(seed)
     if cuda:
         model = model.cuda()
-
-    optimizer = optimizer(model.parameters(), lr, weight_decay=weight_decay)
     best_loss = float('inf')
     not_improved = 0
     best_model = None
