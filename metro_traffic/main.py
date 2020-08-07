@@ -28,6 +28,8 @@ x1s_test, x2s_test, target_test = ss.transform([x1s_test, x2s_test, target_test]
 target_train, target_test = np.expand_dims(target_train, -1), np.expand_dims(target_test, -1)
 model = AttentionRNN(x1s_train.shape[-1], 1, Ty=4)
 
+print(ss.ss[-1].mean_, np.sqrt(ss.ss[-1].var_))
+
 data_train = [x1s_train, x2s_train]
 data_test = [x1s_test, x2s_test]
 
