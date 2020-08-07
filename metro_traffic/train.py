@@ -30,9 +30,9 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, ba
         for t in range(0, stride, step):
             data = [0] * len(data_train)
             for i in range(len(data)):
-                data[i] = data_train[i][i:i+stride*((data_train[i].shape[0]-i)//stride)]
+                data[i] = data_train[i][t:t+stride*((data_train[i].shape[0]-t)//stride)]
                 data[i] = data[i].reshape(data[i].shape[0]//stride, stride, data[i].shape[-1])
-            target = target_train[i:i + stride * ((target_train.shape[0] - i) // stride)]
+            target = target_train[t:t + stride * ((target_train.shape[0] - t) // stride)]
             target = target.reshape(target.shape[0] // stride, stride, target.shape[-1])
             data = shuffle_jointly(*data)
             for i in range(0, data[0].shape[0], batch_size):
@@ -65,9 +65,9 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, ba
         for t in range(0, stride, step):
             data = [0] * len(data_train)
             for i in range(len(data)):
-                data[i] = data_test[i][i:i+stride*((data_test[i].shape[0]-i)//stride)]
+                data[i] = data_test[i][t:t+stride*((data_test[i].shape[0]-t)//stride)]
                 data[i] = data[i].reshape(data[i].shape[0]//stride, stride, data[i].shape[-1])
-            target = target_test[i:i + stride * ((target_test.shape[0] - i) // stride)]
+            target = target_test[t:t + stride * ((target_test.shape[0] - t) // stride)]
             target = target.reshape(target.shape[0] // stride, stride, target.shape[-1])
             for i in range(0, data[0].shape[0], batch_size):
                 for j in range(len(data)):
