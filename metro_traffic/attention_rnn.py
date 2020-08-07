@@ -24,8 +24,6 @@ class AttentionRNN(nn.Module):
         self.fc2 = nn.Linear(input_size-1, project_size)
         self.encoder = nn.LSTM(project_size, hidden_size=encoder_hidden_size, num_layers=encoder_num_layers,
                                bidirectional=True, batch_first=True, dropout=dropout)
-        self.encoder2 = nn.LSTM(project_size, hidden_size=encoder_hidden_size, num_layers=encoder_num_layers,
-                                bidirectional=True, batch_first=True, dropout=dropout)
         self.post_attention_lstm = nn.LSTM(self.encoder.hidden_size * 2, hidden_size=decoder_hidden_size,
                                            num_layers=decoder_num_layers, batch_first=True, dropout=dropout)
         self.attention = nn.Sequential(
@@ -53,9 +51,8 @@ class AttentionRNN(nn.Module):
         result = []
         x = F.relu(self.fc1(x))
         x2 = F.relu(self.fc2(x2))
-        x2, _ = self.encoder2(x2)
-        x, _ = self.encoder(x)
         x = torch.cat([x, x2], dim=-2)
+        x, _ = self.encoder(x)
         x = self.dropout1(x)
         self.Tx = x.shape[1]
         s_prev, c_prev = self.init_hidden(self.post_attention_lstm, x.shape[0])

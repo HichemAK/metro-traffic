@@ -11,7 +11,7 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, ba
                      criterion=nn.MSELoss(),
                      optimizer=torch.optim.Adam, weight_decay=0, lr=0.001,
                      valid_check=3, anneal_coeff=0.6, max_not_improved=5, print_every=100000000, cuda=False,
-                     seed=12362736):
+                     stride=48, step=5, seed=12362736):
     random.seed(seed, version=2)
     torch.manual_seed(seed)
     if cuda:
@@ -21,8 +21,6 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, ba
     best_loss = float('inf')
     not_improved = 0
     best_model = None
-    stride = 48
-    step = 5
     for epoch in range(num_epochs):
         print("Epoch", epoch)
         total_loss = 0

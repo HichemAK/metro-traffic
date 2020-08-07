@@ -34,5 +34,3 @@ model = torch_train_loop(model, data_train, data_test, target_train, target_test
                          print_every=20, lr=0.05)
 
 torch.save(model, 'model.pt')
-
-evaluate()
