@@ -117,6 +117,7 @@ def evaluate(model, data_test, target_test, criterion, batch_size, cuda=False):
     step = 5
     total_loss = torch.zeros(stride)
     if cuda:
+        model = model.cuda()
         total_loss = total_loss.cuda()
     count = 0
     inputs = [0, ] * len(data_test)
