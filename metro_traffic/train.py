@@ -107,7 +107,7 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, op
         print('\n')
 
     print('Best Validation Loss :', best_loss)
-    return best_model
+    return best_model, model
 
 def evaluate(model, data_test, target_test, criterion, batch_size, cuda=False, stride=48, step=5):
     total_loss = torch.zeros(stride)
