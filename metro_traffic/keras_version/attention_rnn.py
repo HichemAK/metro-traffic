@@ -1,11 +1,12 @@
+import keras
 import tensorflow as tf
 from keras import Model
 from keras import Sequential
-from keras.layers import Bidirectional, LSTM, Dense, Lambda, Concatenate, Softmax
+from keras.layers import Bidirectional, LSTM, Dense, Concatenate, Lambda
 
 
 class AttentionRNN(Model):
-    def __init__(self, input_size, output_size, Ty, hidden_size_encoder=128,
+    def __init__(self, output_size, Ty, hidden_size_encoder=128,
                  hidden_size_decoder=128, dropout=0.1):
         super(AttentionRNN, self).__init__()
         self.Ty = Ty
@@ -15,34 +16,38 @@ class AttentionRNN(Model):
             LSTM(units=hidden_size_encoder, dropout=dropout, recurrent_dropout=dropout, return_sequences=True))
 
         # Decoder
-        self.lstm = LSTM(units=hidden_size_decoder, dropout=dropout, recurrent_dropout=dropout, return_state=True)
-        self.attention = Sequential([Dense(80, activation='relu'), Dense(1)])
+        self.decoder = AttentionDecoder(Ty, hidden_size_decoder, dropout)
         self.dense = Dense(output_size)
-        self.concatenate = Concatenate(axis=-1)
-        self.squeeze = Lambda(lambda x : tf.squeeze(x))
-        self.expand_dims = Lambda(lambda x : tf.expand_dims(x, axis=1))
-        self.repeat = Lambda(lambda var : tf.repeat(var[0], var[1], axis=1))
-        self.softmax = Softmax()
-        self.reduce_sum = Lambda(lambda var : tf.reduce_sum(var[0] * tf.expand_dims(var[1], -1), axis=1))
-        self.stack = Lambda(lambda x : tf.stack(x))
 
     def call(self, x1):
         if isinstance(x1, tuple):
             x1 = x1[0]
         x1 = self.bi_lstm(x1)
-        state = (tf.zeros((x1.shape[0], self.lstm.units)), tf.zeros((x1.shape[0], self.lstm.units)))
+        outputs = self.decoder(x1)
+        return self.dense(outputs)
+
+class AttentionDecoder(keras.layers.Layer):
+    def __init__(self, Ty, hidden_size_decoder, dropout):
+        super().__init__()
+        self.lstm = LSTM(units=hidden_size_decoder, dropout=dropout, recurrent_dropout=dropout, return_state=True)
+        self.attention = Sequential([Dense(80, activation='relu'), Dense(1)])
+        self.concatenate = Concatenate(axis=-1)
+        self.Ty = Ty
+        self.initial_state = Lambda(lambda var : (tf.zeros((tf.shape(var[0])[0], var[1])), ) * 2)
+
+    def call(self, x):
+        state = self.initial_state((x, self.lstm.units))
         outputs = []
         for _ in range(self.Ty):
-            repeat = self.expand_dims(state[0])
-            repeat = self.repeat((repeat, x1.shape[1]))
-            repeat = self.concatenate([x1, repeat])
+            repeat = tf.expand_dims(state[0], axis=1)
+            repeat = tf.repeat(repeat, tf.shape(x)[1], axis=1)
+            repeat = self.concatenate([x, repeat])
             attention = self.attention(repeat)
-            attention = self.squeeze(attention)
-            attention = self.softmax(attention)
-            attention = self.reduce_sum((x1, attention))
-            attention = self.expand_dims(attention)
+            attention = tf.nn.softmax(attention, axis=-2)
+            attention = tf.reduce_sum(x * attention, axis=1)
+            attention = tf.expand_dims(attention, axis=1)
             res, state1, state2 = self.lstm(attention, initial_state=state)
             state = state1, state2
             outputs.append(res)
-        outputs = self.stack(outputs)
-        return self.dense(outputs)
+        outputs = tf.stack(outputs, axis=1)
+        return outputs
