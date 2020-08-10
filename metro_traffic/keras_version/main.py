@@ -4,6 +4,7 @@ import pandas as pd
 import tensorflow as tf
 from numpy.random import seed
 from sklearn.model_selection import train_test_split
+from metro_traffic.keras_version.metrics import rmse_per_pos
 
 from metro_traffic.keras_version.attention_rnn import AttentionRNN
 from metro_traffic.utils import CustomStandardScaler, shuffle_jointly
@@ -14,7 +15,7 @@ seed(42)
 train = pd.read_csv('../train.csv')
 train.drop(columns='date_time', inplace=True)
 
-packet_size = 4
+packet_size = 6
 x1s = train.values[:-packet_size]
 x2s = train.drop(columns='traffic_volume').values[packet_size:]
 targets = train['traffic_volume'].values[packet_size:]
@@ -65,9 +66,10 @@ step = 2
 
 model.compile(optimizer=keras.optimizers.Adam(),
               loss=keras.losses.MeanSquaredError(),
-              metrics=keras.metrics.RootMeanSquaredError())
+              metrics=[keras.metrics.RootMeanSquaredError(), rmse_per_pos])
 
-history = model.fit(generator(data_train, target_train, packet_size, step, batch_size=32), epochs=10,
-                    validation_data=generator(data_test, target_test, packet_size, step, batch_size=32),
-                    steps_per_epoch=500,
-                    validation_steps=data_test[0].shape[0] // 32)
+batch_size = 32
+history = model.fit(generator(data_train, target_train, packet_size, step, batch_size=32), epochs=40,
+                    validation_data=generator(data_test, target_test, packet_size, step, batch_size=batch_size),
+                    steps_per_epoch=data_train[0].shape[0] // (batch_size * packet_size),
+                    validation_steps=data_test[0].shape[0] // (batch_size * packet_size))
