@@ -13,7 +13,7 @@ class AttentionRNN(Model):
         self.dropout = dropout
         # Encoder
         self.bi_lstm = Bidirectional(
-            LSTM(units=hidden_size_encoder, dropout=dropout, recurrent_dropout=dropout, return_sequences=True))
+            LSTM(units=hidden_size_encoder, dropout=dropout, return_sequences=True))
 
         # Decoder
         self.decoder = AttentionDecoder(Ty, hidden_size_decoder, dropout)
@@ -29,7 +29,7 @@ class AttentionRNN(Model):
 class AttentionDecoder(keras.layers.Layer):
     def __init__(self, Ty, hidden_size_decoder, dropout):
         super().__init__()
-        self.lstm = LSTM(units=hidden_size_decoder, dropout=dropout, recurrent_dropout=dropout, return_state=True)
+        self.lstm = LSTM(units=hidden_size_decoder, dropout=dropout, return_state=True)
         self.attention = Sequential([Dense(80, activation='relu'), Dense(1)])
         self.concatenate = Concatenate(axis=-1)
         self.Ty = Ty

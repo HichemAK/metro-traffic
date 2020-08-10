@@ -1,10 +1,15 @@
 import keras
 import numpy as np
 import pandas as pd
+import tensorflow as tf
+from numpy.random import seed
 from sklearn.model_selection import train_test_split
 
 from metro_traffic.keras_version.attention_rnn import AttentionRNN
 from metro_traffic.utils import CustomStandardScaler, shuffle_jointly
+
+tf.random.set_seed(42)
+seed(42)
 
 train = pd.read_csv('../train.csv')
 train.drop(columns='date_time', inplace=True)
