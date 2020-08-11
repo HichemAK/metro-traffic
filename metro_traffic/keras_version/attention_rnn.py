@@ -4,6 +4,31 @@ from keras import Model
 from keras import Sequential
 from keras.layers import Bidirectional, LSTM, Dense, Concatenate, Lambda
 
+class AttentionRNNFuture(Model):
+    def __init__(self, output_size, Ty, hidden_size_encoder=128,
+                 hidden_size_decoder=128, dropout=0.1):
+        super(AttentionRNNFuture, self).__init__()
+        self.Ty = Ty
+        self.dropout = dropout
+        # Encoder
+        self.bi_lstm = Bidirectional(
+            LSTM(units=hidden_size_encoder, dropout=dropout, return_sequences=True))
+        self.bi_lstm2 = Bidirectional(
+            LSTM(units=hidden_size_encoder, dropout=dropout, return_sequences=True))
+
+        # Decoder
+        self.decoder = AttentionDecoder(Ty, hidden_size_decoder, dropout)
+        self.dense = Dense(output_size)
+
+    def call(self, x):
+        if isinstance(x, tuple):
+            x1, x2 = x
+        x1 = self.bi_lstm(x1)
+        x2 = self.bi_lstm2(x2)
+        x1 = tf.concat([x1, x2], axis=1)
+        outputs = self.decoder(x1)
+        return self.dense(outputs)
+
 
 class AttentionRNN(Model):
     def __init__(self, output_size, Ty, hidden_size_encoder=128,

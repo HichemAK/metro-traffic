@@ -4,9 +4,8 @@ import pandas as pd
 import tensorflow as tf
 from numpy.random import seed
 from sklearn.model_selection import train_test_split
-from metro_traffic.keras_version.metrics import rmse_per_pos
 
-from metro_traffic.keras_version.attention_rnn import AttentionRNN
+from metro_traffic.keras_version.attention_rnn import AttentionRNNFuture
 from metro_traffic.utils import CustomStandardScaler, shuffle_jointly
 import pandas as pd
 
@@ -33,11 +32,8 @@ target_train, target_test = np.expand_dims(target_train, -1), np.expand_dims(tar
 
 print(ss.ss[-1].mean_, np.sqrt(ss.ss[-1].var_))
 
-# data_train = [x1s_train, x2s_train]
-# data_test = [x1s_test, x2s_test]
-
-data_train = [x1s_train, ]
-data_test = [x1s_test, ]
+data_train = [x1s_train, x2s_train]
+data_test = [x1s_test, x2s_test]
 
 
 def generator(data_, target_, stride, step, batch_size):
@@ -63,13 +59,11 @@ def generator(data_, target_, stride, step, batch_size):
 
 step = 2
 
-
-
 batch_size = 32
 # GridSearch
 path = 'grid_search_results.csv'
 dropouts = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
-learning_rates = [1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2]
+learning_rates = [1e-3, 3e-3]
 hidden_sizes = [512, 256, 128, 64, 32]
 
 df = pd.DataFrame(columns=['dropout', 'lr', 'hs', 'loss', 'val_loss'])
@@ -77,12 +71,14 @@ df = pd.DataFrame(columns=['dropout', 'lr', 'hs', 'loss', 'val_loss'])
 for dropout in dropouts:
     for lr in learning_rates:
         for hs in hidden_sizes:
+            tf.random.set_seed(42)
+            seed(42)
             print("Begin Training...", (dropout, lr, hs))
-            model = AttentionRNN(1, Ty=packet_size, hidden_size_encoder=hs, hidden_size_decoder=hs,
+            model = AttentionRNNFuture(1, Ty=packet_size, hidden_size_encoder=hs, hidden_size_decoder=hs,
                                  dropout=dropout)
             model.compile(optimizer=keras.optimizers.Adam(learning_rate=lr),
                           loss=keras.losses.MeanSquaredError())
-            history = model.fit(generator(data_train, target_train, packet_size, step, batch_size=32), epochs=40,
+            history = model.fit(generator(data_train, target_train, packet_size, step, batch_size=32), epochs=20,
                                 validation_data=generator(data_test, target_test, packet_size, step, batch_size=batch_size),
                                 steps_per_epoch=data_train[0].shape[0] // (batch_size * packet_size),
                                 validation_steps=data_test[0].shape[0] // (batch_size * packet_size))
