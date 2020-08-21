@@ -27,8 +27,8 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, op
         for t in range(0, stride, step):
             data = [0] * len(data_train)
             for i in range(len(data)):
-                data[i] = data_train[i][t:t+stride*((data_train[i].shape[0]-t)//stride)]
-                data[i] = data[i].reshape(data[i].shape[0]//stride, stride, data[i].shape[-1])
+                data[i] = data_train[i][t:t + stride * ((data_train[i].shape[0] - t) // stride)]
+                data[i] = data[i].reshape(data[i].shape[0] // stride, stride, data[i].shape[-1])
             target = target_train[t:t + stride * ((target_train.shape[0] - t) // stride)]
             target = target.reshape(target.shape[0] // stride, stride, target.shape[-1])
             data = shuffle_jointly(*data)
@@ -62,8 +62,8 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, op
         for t in range(0, stride, step):
             data = [0] * len(data_train)
             for i in range(len(data)):
-                data[i] = data_test[i][t:t+stride*((data_test[i].shape[0]-t)//stride)]
-                data[i] = data[i].reshape(data[i].shape[0]//stride, stride, data[i].shape[-1])
+                data[i] = data_test[i][t:t + stride * ((data_test[i].shape[0] - t) // stride)]
+                data[i] = data[i].reshape(data[i].shape[0] // stride, stride, data[i].shape[-1])
             target = target_test[t:t + stride * ((target_test.shape[0] - t) // stride)]
             target = target.reshape(target.shape[0] // stride, stride, target.shape[-1])
             for i in range(0, data[0].shape[0], batch_size):
@@ -108,6 +108,7 @@ def torch_train_loop(model, data_train, data_test, target_train, target_test, op
 
     print('Best Validation Loss :', best_loss)
     return best_model, model
+
 
 def evaluate(model, data_test, target_test, criterion, batch_size, cuda=False, stride=48, step=5):
     total_loss = torch.zeros(stride)

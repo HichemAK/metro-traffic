@@ -4,6 +4,7 @@ from keras import Model
 from keras import Sequential
 from keras.layers import Bidirectional, LSTM, Dense, Concatenate, Lambda
 
+
 class AttentionRNNFuture(Model):
     def __init__(self, output_size, Ty, hidden_size_encoder=128,
                  hidden_size_decoder=128, dropout=0.1):
@@ -51,6 +52,7 @@ class AttentionRNN(Model):
         outputs = self.decoder(x1)
         return self.dense(outputs)
 
+
 class AttentionDecoder(keras.layers.Layer):
     def __init__(self, Ty, hidden_size_decoder, dropout):
         super().__init__()
@@ -58,7 +60,7 @@ class AttentionDecoder(keras.layers.Layer):
         self.attention = Sequential([Dense(80, activation='relu'), Dense(1)])
         self.concatenate = Concatenate(axis=-1)
         self.Ty = Ty
-        self.initial_state = Lambda(lambda var : (tf.zeros((tf.shape(var[0])[0], var[1])), ) * 2)
+        self.initial_state = Lambda(lambda var: (tf.zeros((tf.shape(var[0])[0], var[1])),) * 2)
 
     def call(self, x):
         state = self.initial_state((x, self.lstm.units))

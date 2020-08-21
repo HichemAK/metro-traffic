@@ -7,7 +7,6 @@ from sklearn.model_selection import train_test_split
 
 from metro_traffic.keras_version.attention_rnn import AttentionRNNFuture
 from metro_traffic.utils import CustomStandardScaler, shuffle_jointly
-import pandas as pd
 
 tf.random.set_seed(42)
 seed(42)
@@ -75,11 +74,12 @@ for dropout in dropouts:
             seed(42)
             print("Begin Training...", (dropout, lr, hs))
             model = AttentionRNNFuture(1, Ty=packet_size, hidden_size_encoder=hs, hidden_size_decoder=hs,
-                                 dropout=dropout)
+                                       dropout=dropout)
             model.compile(optimizer=keras.optimizers.Adam(learning_rate=lr),
                           loss=keras.losses.MeanSquaredError())
             history = model.fit(generator(data_train, target_train, packet_size, step, batch_size=32), epochs=20,
-                                validation_data=generator(data_test, target_test, packet_size, step, batch_size=batch_size),
+                                validation_data=generator(data_test, target_test, packet_size, step,
+                                                          batch_size=batch_size),
                                 steps_per_epoch=data_train[0].shape[0] // (batch_size * packet_size),
                                 validation_steps=data_test[0].shape[0] // (batch_size * packet_size))
             df2 = pd.DataFrame(data=history.history)

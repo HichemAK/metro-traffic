@@ -1,13 +1,11 @@
+import numpy as np
 import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from torch import nn
-import numpy as np
-from torch import optim
 
 from metro_traffic.attention_rnn import AttentionRNN
-from metro_traffic.train import torch_train_loop, evaluate
+from metro_traffic.train import torch_train_loop
 from metro_traffic.utils import CustomStandardScaler
 
 train = pd.read_csv('train.csv')
@@ -27,7 +25,8 @@ x1s_train, x2s_train, target_train = ss.fit_transform([x1s_train, x2s_train, tar
 x1s_test, x2s_test, target_test = ss.transform([x1s_test, x2s_test, target_test])
 
 target_train, target_test = np.expand_dims(target_train, -1), np.expand_dims(target_test, -1)
-model = AttentionRNN(x1s_train.shape[-1], 1, Ty=packet_size, project_size=100, encoder_hidden_size=32, encoder_num_layers=4,
+model = AttentionRNN(x1s_train.shape[-1], 1, Ty=packet_size, project_size=100, encoder_hidden_size=32,
+                     encoder_num_layers=4,
                      decoder_hidden_size=32, decoder_num_layers=4, dropout=0)
 
 print(ss.ss[-1].mean_, np.sqrt(ss.ss[-1].var_))

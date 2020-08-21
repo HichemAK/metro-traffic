@@ -4,11 +4,9 @@ import pandas as pd
 import tensorflow as tf
 from numpy.random import seed
 from sklearn.model_selection import train_test_split
-from metro_traffic.keras_version.metrics import rmse_per_pos
 
 from metro_traffic.keras_version.attention_rnn import AttentionRNN
 from metro_traffic.utils import CustomStandardScaler, shuffle_jointly
-import pandas as pd
 
 tf.random.set_seed(42)
 seed(42)
@@ -63,8 +61,6 @@ def generator(data_, target_, stride, step, batch_size):
 
 step = 2
 
-
-
 batch_size = 32
 # GridSearch
 path = 'grid_search_results.csv'
@@ -83,7 +79,8 @@ for dropout in dropouts:
             model.compile(optimizer=keras.optimizers.Adam(learning_rate=lr),
                           loss=keras.losses.MeanSquaredError())
             history = model.fit(generator(data_train, target_train, packet_size, step, batch_size=32), epochs=40,
-                                validation_data=generator(data_test, target_test, packet_size, step, batch_size=batch_size),
+                                validation_data=generator(data_test, target_test, packet_size, step,
+                                                          batch_size=batch_size),
                                 steps_per_epoch=data_train[0].shape[0] // (batch_size * packet_size),
                                 validation_steps=data_test[0].shape[0] // (batch_size * packet_size))
             df2 = pd.DataFrame(data=history.history)

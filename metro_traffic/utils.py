@@ -406,6 +406,7 @@ def hide_part(image, part=0.2):
     image[start:start + length] = 0
     return image, image_org
 
+
 class CustomStandardScaler(TransformerMixin, BaseEstimator):
     def __init__(self, num):
         self.ss = [StandardScaler() for _ in range(num)]

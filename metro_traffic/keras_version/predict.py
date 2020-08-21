@@ -1,20 +1,20 @@
 import keras
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.preprocessing import StandardScaler
 import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from metro_traffic.utils import CustomStandardScaler
 
 
-def predict(model : keras.Model, standard_scaler : CustomStandardScaler, tf_idf : TfidfVectorizer, df_past, df_future):
+def predict(model: keras.Model, standard_scaler: CustomStandardScaler, tf_idf: TfidfVectorizer, df_past, df_future):
     """model : Keras Model"""
     df_past.holiday = df_past.holiday != 'None'
     df_future.holiday = df_future.holiday != 'None'
     t = tf_idf.transform(df_past.weather_description)
     t2 = tf_idf.transform(df_future.weather_description)
     df_past = pd.concat([df_past, pd.DataFrame(data=t.toarray(), index=df_past.index).add_prefix('tag_')], axis=1)
-    df_future = pd.concat([df_future, pd.DataFrame(data=t2.toarray(), index=df_future.index).add_prefix('tag_')], axis=1)
+    df_future = pd.concat([df_future, pd.DataFrame(data=t2.toarray(), index=df_future.index).add_prefix('tag_')],
+                          axis=1)
     df_past.drop(columns='weather_description', inplace=True)
     df_future.drop(columns='weather_description', inplace=True)
 
