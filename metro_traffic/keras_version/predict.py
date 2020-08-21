@@ -1,3 +1,5 @@
+import keras
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
@@ -5,7 +7,7 @@ import pandas as pd
 from metro_traffic.utils import CustomStandardScaler
 
 
-def predict(model, standard_scaler : CustomStandardScaler, tf_idf : TfidfVectorizer, df_past, df_future):
+def predict(model : keras.Model, standard_scaler : CustomStandardScaler, tf_idf : TfidfVectorizer, df_past, df_future):
     """model : Keras Model"""
     df_past.holiday = df_past.holiday != 'None'
     df_future.holiday = df_future.holiday != 'None'
@@ -50,6 +52,9 @@ def predict(model, standard_scaler : CustomStandardScaler, tf_idf : TfidfVectori
     df_past.drop(columns='traffic_volume', inplace=True)
 
     df_past, df_future, traffic = standard_scaler.transform([df_past, df_future, traffic])
+
+    df_future = df_future[np.newaxis, :]
+    df_future = df_future[np.newaxis, :]
 
     y = model.predict((df_past, df_future))
     return standard_scaler.ss[2].inverse_transform(y)
