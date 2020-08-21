@@ -1,3 +1,4 @@
+import joblib
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -33,6 +34,7 @@ def main():
 
     train.to_csv('train.csv', index=False)
     test.to_csv('test.csv', index=False)
+    joblib.dump(tf_idf, '../tf_idf')
 
 
 if __name__ == '__main__':
