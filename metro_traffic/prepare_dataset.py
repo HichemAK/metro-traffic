@@ -2,7 +2,6 @@ import joblib
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-
 def main():
     df = pd.read_csv('Metro_Interstate_Traffic_Volume.csv')
     df.date_time = pd.to_datetime(df.date_time)

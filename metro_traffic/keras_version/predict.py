@@ -8,6 +8,9 @@ from metro_traffic.utils import CustomStandardScaler
 
 def predict(model: keras.Model, standard_scaler: CustomStandardScaler, tf_idf: TfidfVectorizer, df_past, df_future):
     """model : Keras Model"""
+    df_past.date_time = pd.to_datetime(df_past.date_time)
+    df_future.date_time = pd.to_datetime(df_future.date_time)
+
     df_past.holiday = df_past.holiday != 'None'
     df_future.holiday = df_future.holiday != 'None'
     t = tf_idf.transform(df_past.weather_description)
