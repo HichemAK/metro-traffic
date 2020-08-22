@@ -1,12 +1,15 @@
 import keras
 import numpy as np
 import pandas as pd
+from pandas import CategoricalDtype
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from metro_traffic.utils import CustomStandardScaler
+import tensorflow as tf
 
 
-def predict(model: keras.Model, standard_scaler: CustomStandardScaler, tf_idf: TfidfVectorizer, df_past, df_future):
+def predict(model: keras.Model, standard_scaler: CustomStandardScaler, tf_idf: TfidfVectorizer, column_dummies,
+            df_past, df_future):
     """model : Keras Model"""
     df_past.date_time = pd.to_datetime(df_past.date_time)
     df_future.date_time = pd.to_datetime(df_future.date_time)
@@ -33,6 +36,10 @@ def predict(model: keras.Model, standard_scaler: CustomStandardScaler, tf_idf: T
     df_future['month'] = df_future.date_time.dt.month_name()
     df_future.holiday = df_future.holiday.astype(int)
 
+    for col, values in column_dummies.items():
+        df_future[col] = df_future[col].astype(CategoricalDtype(values))
+        df_past[col] = df_past[col].astype(CategoricalDtype(values))
+
     df_past = df_past.join(pd.get_dummies(df_past.weather_main, prefix='weather'))
     df_past = df_past.join(pd.get_dummies(df_past.hour, prefix='hour'))
     df_past = df_past.join(pd.get_dummies(df_past.weekday, prefix='weekday'))
@@ -52,12 +59,14 @@ def predict(model: keras.Model, standard_scaler: CustomStandardScaler, tf_idf: T
     df_future.drop(columns='date_time', inplace=True)
 
     traffic = df_past['traffic_volume'].values.reshape(-1, 1)
-    df_past.drop(columns='traffic_volume', inplace=True)
+
 
     df_past, df_future, traffic = standard_scaler.transform([df_past, df_future, traffic])
 
     df_future = df_future[np.newaxis, :]
-    df_future = df_future[np.newaxis, :]
+    df_past = df_past[np.newaxis, :]
 
     y = model.predict((df_past, df_future))
+    y = tf.squeeze(y)
+    y = y.numpy()
     return standard_scaler.ss[2].inverse_transform(y)

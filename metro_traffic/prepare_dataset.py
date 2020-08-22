@@ -19,6 +19,15 @@ def main():
     df['month'] = df.date_time.dt.month_name()
     df.holiday = df.holiday.astype(int)
 
+    uniques = {
+        'weather_main' : sorted(df.weather_main.unique().tolist()),
+        'hour': sorted(df.hour.unique().tolist()),
+        'weekday': sorted(df.weekday.unique().tolist()),
+        'day': sorted(df.day.unique().tolist()),
+        'month': sorted(df.month.unique().tolist()),
+    }
+    joblib.dump(uniques, '../column_dummies.sk')
+
     df = df.join(pd.get_dummies(df.weather_main, prefix='weather'))
     df = df.join(pd.get_dummies(df.hour, prefix='hour'))
     df = df.join(pd.get_dummies(df.weekday, prefix='weekday'))

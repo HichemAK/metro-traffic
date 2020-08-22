@@ -1,3 +1,4 @@
+import joblib
 import keras
 import numpy as np
 import pandas as pd
@@ -28,6 +29,7 @@ x1s_train, x2s_train, target_train = ss.fit_transform([x1s_train, x2s_train, tar
 x1s_test, x2s_test, target_test = ss.transform([x1s_test, x2s_test, target_test])
 
 target_train, target_test = np.expand_dims(target_train, -1), np.expand_dims(target_test, -1)
+
 
 print(ss.ss[-1].mean_, np.sqrt(ss.ss[-1].var_))
 
